@@ -166,7 +166,7 @@ class Time_Interval:
         to two other methods: subtract_nested_time_intervals() and 
         subtract_non_nested_time_intervals().
         """
-        if other.is_nested(self):
+        if other.is_nested_in(self):
             return self.subtract_nested_time_intervals(other)
         elif self.is_disjoint_with(other):
             return self
@@ -219,9 +219,9 @@ class Time_Interval:
         
         The intersection can only ever be a single time interval, or none.
         """
-        if other.is_nested(self):
+        if other.is_nested_in(self):
             return other
-        elif self.is_nested(other):
+        elif self.is_nested_in(other):
             return self
         else:
             return self - (self - other)
@@ -254,7 +254,7 @@ class Time_Interval:
             return True
         return False
 
-    def is_nested(self, other) -> bool:
+    def is_nested_in(self, other) -> bool:
         """Returns True if this time interval is inside the other."""
         if self.start >= other.start and self.end <= other.end:
             return True
