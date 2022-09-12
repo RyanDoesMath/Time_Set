@@ -63,7 +63,10 @@ class Time_Set:
     def compute_union(self):
         """Sets the union of this Time_Set."""
         if self.is_mutually_disjoint() and not self.has_touching_boundaries():
-            return self.time_intervals
+            if len(self.time_intervals) == 1:
+                return self.time_intervals[0]
+            else:
+                return self
 
         union = self.time_intervals.copy()
         for ix, i in enumerate(union[1:]):
@@ -153,7 +156,7 @@ class Time_Interval:
 
     def __lt__(self, other):
         """A Time_Interval is less than another if its start is earlier."""
-        self.start < other.start
+        return self.start < other.start
 
     def __sub__(self, other):
         """Returns the set difference between this time interval and the other.
@@ -163,7 +166,7 @@ class Time_Interval:
         to two other methods: subtract_nested_time_intervals() and 
         subtract_non_nested_time_intervals().
         """
-        if other.is_nested(self):
+        if other.is_nested_in(self):
             return self.subtract_nested_time_intervals(other)
         elif self.is_disjoint_with(other):
             return self
@@ -216,9 +219,9 @@ class Time_Interval:
         
         The intersection can only ever be a single time interval, or none.
         """
-        if other.is_nested(self):
+        if other.is_nested_in(self):
             return other
-        elif self.is_nested(other):
+        elif self.is_nested_in(other):
             return self
         else:
             return self - (self - other)
@@ -251,7 +254,7 @@ class Time_Interval:
             return True
         return False
 
-    def is_nested(self, other) -> bool:
+    def is_nested_in(self, other) -> bool:
         """Returns True if this time interval is inside the other."""
         if self.start >= other.start and self.end <= other.end:
             return True
