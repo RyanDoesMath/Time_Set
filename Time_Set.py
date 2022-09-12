@@ -63,7 +63,10 @@ class Time_Set:
     def compute_union(self):
         """Sets the union of this Time_Set."""
         if self.is_mutually_disjoint() and not self.has_touching_boundaries():
-            return self.time_intervals
+            if len(self.time_intervals) == 1:
+                return self.time_intervals[0]
+            else:
+                return self
 
         union = self.time_intervals.copy()
         for ix, i in enumerate(union[1:]):
@@ -153,7 +156,7 @@ class Time_Interval:
 
     def __lt__(self, other):
         """A Time_Interval is less than another if its start is earlier."""
-        self.start < other.start
+        return self.start < other.start
 
     def __sub__(self, other):
         """Returns the set difference between this time interval and the other.
