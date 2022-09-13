@@ -61,7 +61,7 @@ class Time_Set:
         return intersection
 
     def compute_union(self):
-        """Sets the union of this Time_Set."""
+        """A recursive method for setting the union of this Time_Set."""
         if self.is_mutually_disjoint() and not self.has_touching_boundaries():
             if len(self.time_intervals) == 1:
                 return self.time_intervals[0]
@@ -190,11 +190,11 @@ class Time_Interval:
 
         try:
             left_time_interval = Time_Interval(earliest_start, latest_start)
-        except:
+        except ValueError:
             left_time_interval = None
         try:
             right_time_interval = Time_Interval(earliest_end, latest_end)
-        except:
+        except ValueError:
             right_time_interval = None
 
         if left_time_interval is None and right_time_interval is None:
@@ -227,11 +227,11 @@ class Time_Interval:
             return self - (self - other)
 
     def union(self, other):
-        """Returns the intersection of this Time_Interval and another.
+        """Returns the union of this Time_Interval and another.
         
-        Because a union of disjoint time intervals is a list of two time
-        intervals, this function returns a Time_Set object for the disjoint
-        case.
+        Because a union can either result in a single time interval,
+        or two time intervals, this method can return either a 
+        Time_Interval object, or a Time_Set in the disjoint case.
         """
         earliest_start = min(self.start, other.start)
         latest_end = max(self.end, other.end)
