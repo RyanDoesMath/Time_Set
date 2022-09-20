@@ -8,10 +8,7 @@ class Time_Set:
     def __init__(self, time_intervals: list):
         """Constructs a Time_Set from Time_Interval objects."""
         self.validate_list_of_time_intervals(time_intervals)
-
         self.time_intervals = sorted(time_intervals)
-        self.intersection = self.compute_intersection()
-        self.union = self.compute_union()
 
     @classmethod
     def from_dataframe(cls, dataframe: pd.core.frame.DataFrame):
@@ -61,30 +58,75 @@ class Time_Set:
         return intersection
 
     def compute_union(self):
-        """A recursive method for setting the union of this Time_Set."""
-        if self.is_mutually_disjoint() and not self.has_touching_boundaries():
-            if len(self.time_intervals) == 1:
-                return self.time_intervals[0]
-            else:
-                return self
+        """Computes the union of this Time_Set.
+        
+        Since this needs to be quite fast, it is not immidiately obvious how
+        this method works. Firstly, it sorts the list by start times. Then,
+        it searches the list for all time intervals that still overlap with
+        the first one, and returns the union of all time intervals that overlap
+        with the first, removes them all, then continues until the list is
+        empty. Thus, ensuring that the union is correct without needing to
+        check if the final list is disjoint or not.
+        
+        Example:
+             [ 1  ]
+        [ 2 ]      
+           [  3 ]
+                    [ 4  ]
+             [5]
+                       [ 6  ]
+                       
+        Step 1: Sort
+        [ 2 ]
+           [  3 ]
+             [ 1  ]
+             [5]
+                    [ 4  ]
+                       [ 6  ]
+        
+        Step 2: find the connected blocks
+        -----------|
+        [ 2 ]      |
+           [  3 ]  |
+             [ 1  ]|
+             [5]   |
+        -----------|---------|
+                   |[ 4  ]   |
+                   |   [ 6  ]|
+                   |---------|
+        
+        Step 3: return the earliest start and latest end for each block.
+        -----------|
+        {    A    }|
+        -----------|---------|
+                   |{   B   }|
+                   |---------|
+        """
+        time_intervals = self.time_intervals.copy()
 
-        union = self.time_intervals.copy()
-        for ix, i in enumerate(union[1:]):
-            if (
-                not union[0].is_disjoint_with(i)
-                or (union[0].end == i.start)
-                or (i.end == union[0].start)
-            ):
-                earliest_start = min(union[0].start, i.start)
-                latest_end = max(union[0].end, i.end)
-                union = list(
-                    union[1 : ix + 1]
-                    + union[ix + 2 :]
-                    + [Time_Interval(earliest_start, latest_end)]
-                ).copy()
-            union = union[1:] + [union[0]]
-        union = Time_Set(union)
-        return union.union
+        if len(time_intervals) == 0:
+            return Time_Set([])
+
+        time_intervals = sorted(time_intervals)
+        union = []
+        latest_end = time_intervals[0].end
+
+        while len(time_intervals) > 1:
+            for ix, i in enumerate(time_intervals):
+                if i.start <= latest_end:
+                    latest_end = i.end if i.end >= latest_end else latest_end
+                if i.start > latest_end or ix + 1 == len(time_intervals):
+                    union.append(Time_Interval(time_intervals[0].start, latest_end))
+                    time_intervals = time_intervals[ix:]
+                    latest_end = time_intervals[0].end
+                    break
+
+        if time_intervals[0].start > union[-1].end:
+            union.append(time_intervals[0])
+        elif time_intervals[0].start == union[-1].end:
+            union[-1].end = time_intervals[0].end
+
+        return Time_Set(union)
 
     def has_touching_boundaries(self):
         """Determines if the set has intervals that share boundaries, but don't overlap.
