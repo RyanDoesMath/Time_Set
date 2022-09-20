@@ -53,54 +53,55 @@ class Test_Time_Set(unittest.TestCase):
         # nested, but first interval is disjoint with the rest.
         self.assertFalse(Time_Set([tr1, tr4, tr5]).is_mutually_disjoint())
 
-    def test_intersection(self):
-        """Tests the intersection computation."""
-        # standard intersection.
+    def test_compute_intersection(self):
+        """Tests the compute_intersection() method."""
+        # standard compute_intersection().
         self.assertEqual(
-            Time_Set([tr1, tr2]).intersection,
+            Time_Set([tr1, tr2]).compute_intersection(),
             Time_Interval.from_strings("8/1/2022 8:00", "8/1/2022 9:00"),
         )
-        # no intersection
-        self.assertIsNone(Time_Set([tr1, tr3]).intersection)
+        # no compute_intersection()
+        self.assertIsNone(Time_Set([tr1, tr3]).compute_intersection())
         # Nested Time Intervals
         self.assertEqual(
-            Time_Set([tr5, tr4]).intersection,
+            Time_Set([tr5, tr4]).compute_intersection(),
             Time_Interval.from_strings("8/1/2022 10:30", "8/1/2022 11:30"),
         )
         # Two layers of mutual nesting.
         self.assertEqual(
-            Time_Set([tr4, tr5, tr6]).intersection,
+            Time_Set([tr4, tr5, tr6]).compute_intersection(),
             Time_Interval.from_strings("8/1/2022 10:45", "8/1/2022 11:15"),
         )
         # One layer of nesting with non-disjoint time-intervals inside.
         self.assertEqual(
-            Time_Set([tr1, tr2, tr11]).intersection,
+            Time_Set([tr1, tr2, tr11]).compute_intersection(),
             Time_Interval.from_strings("8/1/2022 8:00", "8/1/2022 9:00"),
         )
         # One layer of nesting with disjoint time intervals inside.
-        self.assertIsNone(Time_Set([tr1, tr3, tr12]).intersection)
+        self.assertIsNone(Time_Set([tr1, tr3, tr12]).compute_intersection())
 
-    def test_union(self):
+    def test_compute_union(self):
+        """Tests the compute_union() method."""
         # standard, non-disjoint, non-nested case.
         self.assertEqual(
-            Time_Set([tr1, tr2]).union,
-            Time_Interval.from_strings("8/1/2022 7:00", "8/1/2022 10:00"),
+            Time_Set([tr1, tr2]).compute_union(),
+            Time_Set([Time_Interval.from_strings("8/1/2022 7:00", "8/1/2022 10:00")]),
         )
-        # disjoint, but share borders, so they union to one time interval.
+        # disjoint, but share borders, so they compute_union() to one time interval.
         self.assertEqual(
-            Time_Set([tr1, tr2, tr4]).union,
-            Time_Interval.from_strings("8/1/2022 7:00", "8/1/2022 12:00"),
+            Time_Set([tr1, tr2, tr4]).compute_union(),
+            Time_Set([Time_Interval.from_strings("8/1/2022 7:00", "8/1/2022 12:00")]),
         )
         # Time interval equal to tr4 since tr5 is nested.
         self.assertEqual(
-            Time_Set([tr4, tr5]).union,
-            Time_Interval.from_strings("8/1/2022 10:00", "8/1/2022 12:00"),
+            Time_Set([tr4, tr5]).compute_union(),
+            Time_Set([Time_Interval.from_strings("8/1/2022 10:00", "8/1/2022 12:00")]),
         )
         # Totally disjoint, so the result is a time set.
-        self.assertEqual(Time_Set([tr1, tr4]).union, Time_Set([tr1, tr4]))
+        self.assertEqual(Time_Set([tr1, tr4]).compute_union(), Time_Set([tr1, tr4]))
         # One time interval is mutually disjoint with all, but two are not disjoint.
         self.assertEqual(
-            Time_Set([tr1, tr2, tr5]).union,
+            Time_Set([tr1, tr2, tr5]).compute_union(),
             Time_Set(
                 [Time_Interval.from_strings("8/1/2022 7:00", "8/1/2022 10:00"), tr5]
             ),
@@ -111,7 +112,7 @@ class Test_Time_Set(unittest.TestCase):
         # False by definition
         self.assertFalse(Time_Set([]).has_touching_boundaries())
         self.assertFalse(Time_Set([tr1]).has_touching_boundaries())
-        # False because intersection is not empty.
+        # False because compute_intersection() is not empty.
         self.assertFalse(Time_Set([tr1, tr2]).has_touching_boundaries())
         # False because disjoint and don't share boundary.
         self.assertFalse(Time_Set([tr1, tr4]).has_touching_boundaries())
