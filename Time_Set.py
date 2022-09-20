@@ -128,25 +128,6 @@ class Time_Set:
 
         return Time_Set(union)
 
-    def has_touching_boundaries(self):
-        """Determines if the set has intervals that share boundaries, but don't overlap.
-        
-        This is mainly a helper method for compute_union.
-        """
-        for ix, i in enumerate(self.time_intervals):
-            for j in self.time_intervals[0:ix] + self.time_intervals[ix + 1 :]:
-                if i.start == j.end or j.start == i.end:
-                    return True
-        return False
-
-    def is_mutually_disjoint(self) -> bool:
-        """Tells if the Time_Intervals in this Time_Set are mutually disjoint."""
-        for ix, i in enumerate(self.time_intervals):
-            for j in self.time_intervals[ix + 1 :]:
-                if not i.is_disjoint_with(j):
-                    return False
-        return True
-
 
 class Time_Interval:
     """A class that models time intervals.

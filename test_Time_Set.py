@@ -40,19 +40,6 @@ class Test_Time_Set(unittest.TestCase):
         self.assertEqual(Time_Set_1, Time_Set_2)
         self.assertNotEqual(Time_Set_1, Time_Set_3)
 
-    def test_is_mutually_disjoint(self):
-        """Test the is_mutally_disjoint() method."""
-        # totally disjoint.
-        self.assertTrue(Time_Set([tr1, tr4]).is_mutually_disjoint())
-        # share endpoint, but are disjoint.
-        self.assertTrue(Time_Set([tr1, tr3]).is_mutually_disjoint())
-        # overlapping intervals.
-        self.assertFalse(Time_Set([tr1, tr2]).is_mutually_disjoint())
-        # nested intervals.
-        self.assertFalse(Time_Set([tr4, tr5]).is_mutually_disjoint())
-        # nested, but first interval is disjoint with the rest.
-        self.assertFalse(Time_Set([tr1, tr4, tr5]).is_mutually_disjoint())
-
     def test_compute_intersection(self):
         """Tests the compute_intersection() method."""
         # standard compute_intersection().
@@ -106,18 +93,3 @@ class Test_Time_Set(unittest.TestCase):
                 [Time_Interval.from_strings("8/1/2022 7:00", "8/1/2022 10:00"), tr5]
             ),
         )
-
-    def test_has_touching_boundaries(self):
-        """Tests the has_touching_boundaries() method."""
-        # False by definition
-        self.assertFalse(Time_Set([]).has_touching_boundaries())
-        self.assertFalse(Time_Set([tr1]).has_touching_boundaries())
-        # False because compute_intersection() is not empty.
-        self.assertFalse(Time_Set([tr1, tr2]).has_touching_boundaries())
-        # False because disjoint and don't share boundary.
-        self.assertFalse(Time_Set([tr1, tr4]).has_touching_boundaries())
-        # True because all time intervals have touching boundaries.
-        self.assertTrue(Time_Set([tr1, tr13, tr4]).has_touching_boundaries())
-        # True because it has one touching boundary.
-        self.assertTrue(Time_Set([tr1, tr2, tr4]).has_touching_boundaries())
-
