@@ -15,6 +15,10 @@ class Time_Set:
         """Constructs a Time_Set from a pandas dataframe."""
         pass
 
+    def __contains__(self, other):
+        """Returns true if the datetime other is within the time interval"""
+        return self.start <= other and self.end > other
+    
     def __eq__(self, other):
         """Determines if this Time_Set is equal to another."""
         return True if self.time_intervals == other.time_intervals else False
